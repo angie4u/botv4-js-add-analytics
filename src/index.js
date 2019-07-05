@@ -8,7 +8,8 @@ const path = require('path')
 const restify = require('restify')
 
 // Import required bot services. See https://aka.ms/bot-services to learn more about the different parts of a bot.
-const { BotFrameworkAdapter, MemoryStorage, ConversationState, UserState } = require('botbuilder')
+const { BotFrameworkAdapter, MemoryStorage, ConversationState, UserState, BotTelemetryClient, NullTelemetryClient, TelemetryLoggerMiddleware } = require('botbuilder')
+const { ApplicationInsightsTelemetryClient, ApplicationInsightsWebserverMiddleware } = require('botbuilder-applicationinsights')
 
 // This bot's main dialog.
 const { DialogAndWelcomeBot } = require('./bots/dialogAndWelcomeBot')
@@ -17,6 +18,16 @@ const { MainDialog } = require('./dialogs/mainDialog')
 // Note: Ensure you have a .env file and include LuisAppId, LuisAPIKey and LuisAPIHostName.
 const ENV_FILE = path.join(__dirname, '.env')
 require('dotenv').config({ path: ENV_FILE })
+
+function getTelemetryClient (env) {
+  if (env.InstrumentationKey) {
+    const instrumentationKey = env.InstrumentationKey
+    return new ApplicationInsightsTelemetryClient(instrumentationKey)
+  }
+  return new NullTelemetryClient()
+}
+
+const telemetryClient = getTelemetryClient(process.env)
 
 // Create adapter.
 // See https://aka.ms/about-bot-adapter to learn more about adapters.
@@ -34,10 +45,13 @@ adapter.onTurnError = async (context, error) => {
     //       application insights.
   console.error(`\n [onTurnError]: ${error}`)
     // Send a message to the user
-    await context.sendActivity(`Oops. Something went wrong!`)
+  await context.sendActivity(`Oops. Something went wrong!`)
     // Clear out state
-    await conversationState.delete(context)
-};
+  await conversationState.delete(context)
+  telemetryClient.trackException({ exception: error })
+}
+
+adapter.use(new TelemetryLoggerMiddleware(telemetryClient, true))
 
 // Define a state store for your bot. See https://aka.ms/about-bot-state to learn more about using MemoryStorage.
 // A bot requires a state store to persist the dialog and user state between messages.
@@ -55,13 +69,18 @@ const logger = console
 
 // Create the main dialog.
 const dialog = new MainDialog(logger)
-const bot = new DialogAndWelcomeBot(conversationState, userState, dialog, logger)
+const bot = new DialogAndWelcomeBot(conversationState, userState, dialog, logger, telemetryClient)
+
 
 // Create HTTP server
 let server = restify.createServer()
+
+server.use(restify.plugins.bodyParser());
+server.use(ApplicationInsightsWebserverMiddleware);
+
 server.listen(process.env.port || process.env.PORT || 3978, function () {
   console.log(`\n${server.name} listening to ${server.url}`)
-    console.log(`\nGet Bot Framework Emulator: https://aka.ms/botframework-emulator`)
+  console.log(`\nGet Bot Framework Emulator: https://aka.ms/botframework-emulator`)
 })
 
 // Listen for incoming activities and route them to your bot main dialog.
@@ -69,6 +88,6 @@ server.post('/api/messages', (req, res) => {
     // Route received a request to adapter for processing
   adapter.processActivity(req, res, async (turnContext) => {
         // route to bot activity handler.
-      await bot.run(turnContext)
-    })
+    await bot.run(turnContext)
+  })
 })
