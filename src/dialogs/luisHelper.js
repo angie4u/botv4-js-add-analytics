@@ -9,15 +9,18 @@ class LuisHelper {
      * @param {*} logger
      * @param {TurnContext} context
      */
-    static async executeLuisQuery(logger, context) {
+    static async executeLuisQuery(logger, context, telemetryClient) {
         const bookingDetails = {};
-
+        const luisPredictionOptions = { 
+            telemetryClient: telemetryClient,
+            logPersonalInformation: true
+        }
         try {
             const recognizer = new LuisRecognizer({
                 applicationId: process.env.LuisAppId,
                 endpointKey: process.env.LuisAPIKey,
                 endpoint: `https://${ process.env.LuisAPIHostName }`
-            }, {}, true);
+            }, luisPredictionOptions, true);
 
             const recognizerResult = await recognizer.recognize(context);
 
