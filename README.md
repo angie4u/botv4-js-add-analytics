@@ -1,13 +1,13 @@
 # botv4-js-add-analytics
 
-After you built a bot, you may want to build an analytics dashboard to manage the bot. 
-For example, you want to check how many users use my bot? or which dialog is most popular? or.. fancy word cloud for my bot data.
+After you built a bot, you may want to build an analytics dashboard to manage your bot. 
+For example, you want to check how many users use my bot? or which dialog is the most popular one? or.. fancy word cloud for my bot data.
 
 ![Example Report](https://github.com/microsoft/botframework-solutions/raw/master/docs/media/powerbi-conversationanalytics-overall.png)
 It will take a while if you need to make this dashboard from scratch.
 
 There is an awesome project powered by [Virtual Assistant team](https://github.com/microsoft/botframework-solutions/blob/master/docs/readme.md#analytics) which is implemented all the dashboard and queries for this.
-All you need to do is 1.Add Application Insights service to your bot 2.Add some codes to your bot to send telemetry info 3.Check the nice dashboard using ApplicationInsightId. 
+All you need to do is **1.Add Application Insights** service to your bot **2.Add few lines of codes to your bot to send telemetry info** and **3.Check the nice dashboard using ApplicationInsightId.** 
 However, there is no step by step documentation around this, so that's why I wrote this post!
 If there is something missing or wrong, please kindly let me know! ;)
 
@@ -18,9 +18,9 @@ If you already have your own bot, you can use it!
 ### Create the Web App Bot at Azure Portal
 ![az001.JPG](img/az001.JPG)
 ![az002.JPG](img/az002.JPG)
-```
-You need to change the Bot Service Name to different one which needs to be *globally unique*. If not, it will show you an error.
-```
+
+You need to change the Bot Service Name to different one which needs to be **globally unique**. If not, it will show you an error.
+
 ![az003.JPG](img/az003.JPG)
 
 ### Test your bot at the Azure Portal
@@ -32,13 +32,13 @@ You can simply test the bot after the deployment is completed like this.
 ### Download your bot to your machine and open it using editor. 
 1. Go to the **build** panel and click the **Download Bot Source Code** button. It will take a while to prepare a zip file.
 ![az006.JPG](img/az006.JPG)
-2. Open the source code using editor.
+2. Open the source code using an editor.
 ![az007.JPG](img/az007.JPG)
 3. Install the npm package before starting the bot locally. 
 ```node
 npm install 
 ```
-4. Test the bot locally
+4. Test your bot locally
 ```node
 npm start
 ```
