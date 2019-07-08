@@ -48,16 +48,65 @@ Please don't forget to put your **MicrosoftAppId, MicrosoftAppPassword** when yo
 Now your bot is ready and all you need to do is add few lines of code and see if it works ;)
 
 ## Add Telemetry Code to your bot
+### Add Application Insight Instrumentation Key to your .env file
+1. Go to Azure Portal - Application Insights service and get Instrumentation key
+![az011.JPG](img/az011.JPG)
+![az012.JPG](img/az012.JPG)
+
+2. Add the **Instrumentation key** to .env file
+![vsc001.JPG](img/vsc001.JPG)
+
 ### Include the extra packages you need to implement telemetry code
 1. Install **botbuilder-applicationinsights** package 
 ```
 npm install --save botbuilder-applicationinsights
 ```
-2. Import required service(BotTelemetryClient, NullTelemetryClient) to your **index.js** file
+2. Import required service to your **index.js** file
 ```node
-const { BotFrameworkAdapter, MemoryStorage, ConversationState, UserState, BotTelemetryClient, NullTelemetryClient } = require('botbuilder')
+const { BotFrameworkAdapter, MemoryStorage, ConversationState, UserState, BotTelemetryClient, NullTelemetryClient, TelemetryLoggerMiddleware } = require('botbuilder')
 const { ApplicationInsightsTelemetryClient, ApplicationInsightsWebserverMiddleware } = require('botbuilder-applicationinsights');
 ```
+
+3. Add **telemetryClient** setup code
+```node
+function getTelemetryClient(env) {
+    if(env.InstrumentationKey){
+        const instrumentationKey = env.InstrumentationKey;
+        return new ApplicationInsightsTelemetryClient(instrumentationKey);
+    }
+    return new NullTelemetryClient();
+}
+
+const telemetryClient = getTelemetryClient(process.env);
+``` 
+
+4. Add trackException code inside the onTurnError logic
+```
+telemetryClient.trackException({ exception: error });
+```
+![vsc003.JPG](img/vsc003.JPG)
+
+5. Add **TelemetryLoggerMiddleware** to your **adpater**
+```
+adapter.use(new TelemetryLoggerMiddleware(telemetryClient, true));
+```
+![vsc004.JPG](img/vsc004.JPG)
+6. Pass the **telemetryClient** to the bot(DialogAndWelcomeBot)
+```
+const bot = new DialogAndWelcomeBot(conversationState, userState, dialog, logger, telemetryClient)
+```
+![vsc005.JPG](img/vsc005.JPG)
+7. Add **bodyParser, ApplicationInsightsWebserverMiddleware** to your index.js
+```node
+server.use(restify.plugins.bodyParser());
+server.use(ApplicationInsightsWebserverMiddleware);
+```
+![vsc006.JPG](img/vsc006.JPG)
+
+## Update luisHelper.js
+
+## Update dialogAndWelcomeBot.js file
+![vsc007.JPG](img/vsc007.JPG)
 
 ## Connect to Power BI dashboard
 
