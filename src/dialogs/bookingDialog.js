@@ -12,12 +12,12 @@ const TEXT_PROMPT = 'textPrompt';
 const WATERFALL_DIALOG = 'waterfallDialog';
 
 class BookingDialog extends CancelAndHelpDialog {
-    constructor(id) {
+    constructor(id, telemetryClient) {
         super(id || 'bookingDialog');
 
         this.addDialog(new TextPrompt(TEXT_PROMPT))
             .addDialog(new ConfirmPrompt(CONFIRM_PROMPT))
-            .addDialog(new DateResolverDialog(DATE_RESOLVER_DIALOG))
+            .addDialog(new DateResolverDialog(DATE_RESOLVER_DIALOG, telemetryClient))
             .addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
                 this.destinationStep.bind(this),
                 this.originStep.bind(this),
@@ -27,6 +27,7 @@ class BookingDialog extends CancelAndHelpDialog {
             ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
+        this.telemetryClient = telemetryClient;
     }
 
     /**

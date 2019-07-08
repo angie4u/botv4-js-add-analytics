@@ -68,7 +68,7 @@ userState = new UserState(memoryStorage)
 const logger = console
 
 // Create the main dialog.
-const dialog = new MainDialog(logger)
+const dialog = new MainDialog(logger, telemetryClient)
 const bot = new DialogAndWelcomeBot(conversationState, userState, dialog, logger, telemetryClient)
 
 

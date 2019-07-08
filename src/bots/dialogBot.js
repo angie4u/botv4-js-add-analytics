@@ -11,7 +11,7 @@ class DialogBot extends ActivityHandler {
      * @param {Dialog} dialog
      * @param {any} logger object for logging events, defaults to console if none is provided
      */
-    constructor(conversationState, userState, dialog, logger) {
+    constructor(conversationState, userState, dialog, logger, telemetryClient) {
         super();
         if (!conversationState) throw new Error('[DialogBot]: Missing parameter. conversationState is required');
         if (!userState) throw new Error('[DialogBot]: Missing parameter. userState is required');
@@ -25,6 +25,8 @@ class DialogBot extends ActivityHandler {
         this.userState = userState;
         this.dialog = dialog;
         this.logger = logger;
+        this.telemetryClient = telemetryClient;
+
         this.dialogState = this.conversationState.createProperty('DialogState');
 
         this.onMessage(async (context, next) => {

@@ -9,7 +9,7 @@ const DATETIME_PROMPT = 'datetimePrompt';
 const WATERFALL_DIALOG = 'waterfallDialog';
 
 class DateResolverDialog extends CancelAndHelpDialog {
-    constructor(id) {
+    constructor(id, telemetryClient) {
         super(id || 'dateResolverDialog');
         this.addDialog(new DateTimePrompt(DATETIME_PROMPT, this.dateTimePromptValidator.bind(this)))
             .addDialog(new WaterfallDialog(WATERFALL_DIALOG, [
@@ -18,6 +18,7 @@ class DateResolverDialog extends CancelAndHelpDialog {
             ]));
 
         this.initialDialogId = WATERFALL_DIALOG;
+        this.telemetryClient = telemetryClient;
     }
 
     async initialStep(stepContext) {

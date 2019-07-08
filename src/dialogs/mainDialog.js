@@ -10,7 +10,7 @@ const MAIN_WATERFALL_DIALOG = 'mainWaterfallDialog';
 const BOOKING_DIALOG = 'bookingDialog';
 
 class MainDialog extends ComponentDialog {
-    constructor(logger) {
+    constructor(logger, telemetryClient) {
         super('MainDialog');
 
         if (!logger) {
@@ -19,11 +19,10 @@ class MainDialog extends ComponentDialog {
         }
 
         this.logger = logger;
-
         // Define the main dialog and its related components.
         // This is a sample "book a flight" dialog.
         this.addDialog(new TextPrompt('TextPrompt'))
-            .addDialog(new BookingDialog(BOOKING_DIALOG))
+            .addDialog(new BookingDialog(BOOKING_DIALOG, telemetryClient))
             .addDialog(new WaterfallDialog(MAIN_WATERFALL_DIALOG, [
                 this.introStep.bind(this),
                 this.actStep.bind(this),
@@ -31,6 +30,7 @@ class MainDialog extends ComponentDialog {
             ]));
 
         this.initialDialogId = MAIN_WATERFALL_DIALOG;
+        this.telemetryClient = telemetryClient;
     }
 
     /**
@@ -75,7 +75,7 @@ class MainDialog extends ComponentDialog {
             // Call LUIS and gather any potential booking details.
             // This will attempt to extract the origin, destination and travel date from the user's message
             // and will then pass those values into the booking dialog
-            bookingDetails = await LuisHelper.executeLuisQuery(this.logger, stepContext.context);
+            bookingDetails = await LuisHelper.executeLuisQuery(this.logger, stepContext.context, this.telemetryClient);
 
             this.logger.log('LUIS extracted these booking details:', bookingDetails);
         }
